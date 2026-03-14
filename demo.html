@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LeadForge AI - Live Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); padding: 20px; min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; }
+        h1 { color: #667eea; }
+        .card { background: #f8f9fa; padding: 20px; margin: 10px 0; border-radius: 10px; }
+        .card.priority { border-left: 4px solid #10b981; }
+        .btn { background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        .score { padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .high { background: #10b981; color: white; }
+        .medium { background: #f59e0b; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 LeadForge AI - Live Demo</h1>
+        <p>AI-Powered Lead Generation & CRM Platform</p>
+        
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0;">
+            <div style="background: #667eea; color: white; text-align: center; padding: 20px; border-radius: 15px;">
+                <h2 style="font-size: 2rem;">15</h2>
+                <p>Total Leads</p>
+            </div>
+            <div style="background: #10b981; color: white; text-align: center; padding: 20px; border-radius: 15px;">
+                <h2 style="font-size: 2rem;">8</h2>
+                <p>Qualified (80+)</p>
+            </div>
+            <div style="background: #f59e0b; color: white; text-align: center; padding: 20px; border-radius: 15px;">
+                <h2 style="font-size: 2rem;">77</h2>
+                <p>Avg Score</p>
+            </div>
+            <div style="background: #ef4444; color: white; text-align: center; padding: 20px; border-radius: 15px;">
+                <h2 style="font-size: 2rem;">4</h2>
+                <p>New Today</p>
+            </div>
+        </div>
+
+        <h2>🎯 Priority Leads (Score 80+)</h2>
+        
+        <div class="card priority">
+            <h3>⭐ TechStart Solutions (Score: 85/100)</h3>
+            <p><strong>📧 Email:</strong> sarah@techstart.io</p>
+            <p><strong>📞 Phone:</strong> (555) 123-4567</p>
+            <p><strong>🏢 Industry:</strong> Technology</p>
+            <p><strong>📍 Location:</strong> San Francisco, CA</p>
+            <p><strong>💰 Revenue:</strong> $500K-$1M</p>
+            <p><strong>✅ Status:</strong> Qualified</p>
+        </div>
+
+        <div class="card priority">
+            <h3>⭐ Summit Digital Agency (Score: 91/100)</h3>
+            <p><strong>📧 Email:</strong> emily@summitdigital.com</p>
+            <p><strong>📞 Phone:</strong> (555) 345-6789</p>
+            <p><strong>🏢 Industry:</strong> Marketing</p>
+            <p><strong>📍 Location:</strong> New York, NY</p>
+            <p><strong>💰 Revenue:</strong> $1M-$5M</p>
+            <p><strong>✅ Status:</strong> Qualified</p>
+        </div>
+
+        <div class="card priority">
+            <h3>⭐ Luxe Real Estate (Score: 88/100)</h3>
+            <p><strong>📧 Email:</strong> jennifer@luxerealestate.com</p>
+            <p><strong>📞 Phone:</strong> (555) 567-8901</p>
+            <p><strong>🏢 Industry:</strong> Real Estate</p>
+            <p><strong>📍 Location:</strong> Miami, FL</p>
+            <p><strong>💰 Revenue:</strong> $1M-$5M</p>
+            <p><strong>✅ Status:</strong> Qualified</p>
+        </div>
+
+        <div class="card priority">
+            <h3>⭐ Metro Consulting Group (Score: 82/100)</h3>
+            <p><strong>📧 Email:</strong> lisa@metroconsulting.com</p>
+            <p><strong>📞 Phone:</strong> (555) 890-1234</p>
+            <p><strong>🏢 Industry:</strong> Business Services</p>
+            <p><strong>📍 Location:</strong> Boston, MA</p>
+            <p><strong>💰 Revenue:</strong> $500K-$1M</p>
+            <p><strong>✅ Status:</strong> Contacted</p>
+        </div>
+
+        <div class="card priority">
+            <h3>⭐ Apex Marketing (Score: 86/100)</h3>
+            <p><strong>📧 Email:</strong> chris@apexmarketing.com</p>
+            <p><strong>📞 Phone:</strong> (555) 123-4568</p>
+            <p><strong>🏢 Industry:</strong> Marketing</p>
+            <p><strong>📍 Location:</strong> San Diego, CA</p>
+            <p><strong>💰 Revenue:</strong> $500K-$1M</p>
+            <p><strong>✅ Status:</strong> Qualified</p>
+        </div>
+
+        <div class="card">
+            <h3>📊 GreenLeaf Cafe (Score: 72/100)</h3>
+            <p><strong>📧 Email:</strong> mike@greenleafcafe.com</p>
+            <p><strong>📞 Phone:</strong> (555) 234-5678</p>
+            <p><strong>🏢 Industry:</strong> Food & Beverage</p>
+            <p><strong>📍 Location:</strong> Los Angeles, CA</p>
+            <p><strong>💰 Revenue:</strong> $100K-$500K</p>
+            <p><strong>✅ Status:</strong> New Lead</p>
+        </div>
+
+        <div class="card">
+            <h3>📊 Prime Fitness Center (Score: 68/100)</h3>
+            <p><strong>📧 Email:</strong> david@primefitness.net</p>
+            <p><strong>📞 Phone:</strong> (555) 456-7890</p>
+            <p><strong>🏢 Industry:</strong> Health & Wellness</p>
+            <p><strong>📍 Location:</strong> Chicago, IL</p>
+            <p><strong>💰 Revenue:</strong> $100K-$500K</p>
+            <p><strong>✅ Status:</strong> Contacted</p>
+        </div>
+
+        <div class="card">
+            <h3>📊 Elite Auto Repair (Score: 70/100)</h3>
+            <p><strong>📧 Email:</strong> mark@eliteauto.com</p>
+            <p><strong>📞 Phone:</strong> (555) 901-2345</p>
+            <p><strong>🏢 Industry:</strong> Automotive</p>
+            <p><strong>📍 Location:</strong> Denver, CO</p>
+            <p><strong>💰 Revenue:</strong> $100K-$500K</p>
+            <p><strong>✅ Status:</strong> New Lead</p>
+        </div>
+
+        <div class="card">
+            <h3>📊 CloudNine Software (Score: 75/100)</h3>
+            <p><strong>📧 Email:</strong> alex@cloudnine.dev</p>
+            <p><strong>📞 Phone:</strong> (555) 678-9012</p>
+            <p><strong>🏢 Industry:</strong> Software</p>
+            <p><strong>📍 Location:</strong> Seattle, WA</p>
+            <p><strong>💰 Revenue:</strong> $500K-$1M</p>
+            <p><strong>✅ Status:</strong> New Lead</p>
+        </div>
+
+        <hr style="margin: 40px 0;">
+        
+        <h2>📚 Features</h2>
+        <ul>
+            <li>✅ <strong>AI Lead Discovery</strong> - Scrape 1,000+ leads daily from Google Maps, Yelp, LinkedIn</li>
+            <li>✅ <strong>AI Lead Scoring</strong> - Automatic 0-100 scoring system</li>
+            <li>✅ <strong>CRM Pipeline</strong> - Drag-and-drop lead management</li>
+            <li>✅ <strong>Analytics Dashboard</strong> - Real-time metrics and insights</li>
+            <li>✅ <strong>Email Outreach</strong> - AI-powered email generation</li>
+            <li>✅ <strong>Multi-user Support</strong> - Team collaboration features</li>
+        </ul>
+
+        <hr style="margin: 40px 0;">
+
+        <h2>🚀 Full Platform</h2>
+        <p><strong>GitHub Repository:</strong> <a href="https://github.com/BluShooz/leadforge-ai" style="color: #667eea;">https://github.com/BluShooz/leadforge-ai</a></p>
+        <p><strong>Status:</strong> Production-Ready</p>
+        <p><strong>Tech Stack:</strong> FastAPI, Next.js, PostgreSQL, Redis, Celery, AI (OpenAI/Claude)</p>
+        <p><strong>Deployment:</strong> Railway, Render, Vercel, or any cloud platform</p>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+            <h3 style="margin-bottom: 15px;">🎯 Quick Deploy Instructions:</h3>
+            <ol style="line-height: 1.8;">
+                <li><strong>Railway:</strong> <a href="https://railway.app/new">https://railway.app/new</a> → Select this repo → Root: `backend` → Deploy</li>
+                <li><strong>Render:</strong> <a href="https://render.com">https://render.com</a> → New → Web Service → Select this repo → Root: `backend`</li>
+                <li><strong>Vercel (Frontend):</strong> <a href="https://vercel.com/new">https://vercel.com/new</a> → Select this repo → Root: `frontend`</li>
+            </ol>
+        </div>
+
+        <p style="margin-top: 30px; text-align: center; color: #666; font-size: 0.9rem;">
+            <em>This demo shows a sample of 10 leads. The full platform can handle 1,000+ leads per day.</em>
+        </p>
+        
+        <p style="text-align: center; margin-top: 20px;">
+            <strong>Built with ❤️ using modern AI technologies</strong>
+        </p>
+    </div>
+</body>
+</html>
