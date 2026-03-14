@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadForge AI - Live Interactive Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes scorePopup {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .lead-card {
+            animation: slideIn 0.5s ease-out;
+        }
+        .scraping-pulse {
+            animation: pulse 1.5s infinite;
+        }
+        .score-popup {
+            animation: scorePopup 0.5s ease-out;
+        }
+        .pipeline-stage {
+            min-height: 400px;
+        }
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(3deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-900 border-b border-purple-500/30">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        LeadForge AI
+                    </h1>
+                    <p class="text-purple-300 text-sm mt-1">AI-Powered Lead Generation Platform</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="statusIndicator" class="flex items-center gap-2">
+                        <span class="w-3 h-3 bg-gray-500 rounded-full"></span>
+                        <span class="text-sm text-gray-400">Idle</span>
+                    </div>
+                    <button id="startBtn" onclick="startLeadGeneration()"
+                            class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg shadow-purple-500/25">
+                        🚀 Start Lead Generation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Section -->
+    <div id="progressSection" class="hidden bg-gray-800/50 border-b border-gray-700">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-purple-300" id="progressText">Initializing...</span>
+                <span class="text-sm text-gray-400" id="progressStats">0 leads found</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+                <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Stats Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gradient-to-br from-purple-900/50 to-purple-800/30 rounded-xl p-6 border border-purple-500/20">
+                <div class="text-purple-300 text-sm mb-1">Total Leads</div>
+                <div class="text-3xl font-bold" id="totalLeads">0</div>
+            </div>
+            <div class="bg-gradient-to-br from-green-900/50 to-green-800/30 rounded-xl p-6 border border-green-500/20">
+                <div class="text-green-300 text-sm mb-1">Qualified (80+)</div>
+                <div class="text-3xl font-bold" id="qualifiedLeads">0</div>
+            </div>
+            <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl p-6 border border-blue-500/20">
+                <div class="text-blue-300 text-sm mb-1">Avg Score</div>
+                <div class="text-3xl font-bold" id="avgScore">0</div>
+            </div>
+            <div class="bg-gradient-to-br from-orange-900/50 to-orange-800/30 rounded-xl p-6 border border-orange-500/20">
+                <div class="text-orange-300 text-sm mb-1">In Pipeline</div>
+                <div class="text-3xl font-bold" id="inPipeline">0</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Lead Feed -->
+            <div class="lg:col-span-2">
+                <div class="bg-gray-800/50 rounded-xl border border-gray-700">
+                    <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                        <h2 class="text-xl font-semibold flex items-center gap-2">
+                            <span>📊</span> Live Lead Feed
+                        </h2>
+                        <div class="flex gap-2">
+                            <select id="filterIndustry" onchange="filterLeads()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm">
+                                <option value="">All Industries</option>
+                            </select>
+                            <select id="filterScore" onchange="filterLeads()" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm">
+                                <option value="">All Scores</option>
+                                <option value="80">80+ (Qualified)</option>
+                                <option value="60">60-79 (Potential)</option>
+                                <option value="0">0-59 (Low)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="leadFeed" class="p-4 space-y-3 max-h-[600px] overflow-y-auto">
+                        <div class="text-center text-gray-500 py-12">
+                            <div class="text-5xl mb-4">🎯</div>
+                            <p>Click "Start Lead Generation" to begin discovering leads</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Panel -->
+            <div class="space-y-6">
+                <!-- AI Scoring -->
+                <div class="bg-gray-800/50 rounded-xl border border-gray-700">
+                    <div class="p-4 border-b border-gray-700">
+                        <h2 class="text-xl font-semibold flex items-center gap-2">
+                            <span>🤖</span> AI Analysis
+                        </h2>
+                    </div>
+                    <div id="aiAnalysis" class="p-4">
+                        <div class="text-center text-gray-500 py-8">
+                            <p class="text-sm">AI scoring analysis will appear here as leads are discovered</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-gray-800/50 rounded-xl border border-gray-700">
+                    <div class="p-4 border-b border-gray-700">
+                        <h2 class="text-xl font-semibold flex items-center gap-2">
+                            <span>⚡</span> Quick Actions
+                        </h2>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <button onclick="exportLeads()" class="w-full bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
+                            <span>📥</span> Export All Leads
+                        </button>
+                        <button onclick="generateOutreach()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-4 py-2 rounded-lg text-sm transition-all flex items-center justify-center gap-2">
+                            <span>✉️</span> Generate Outreach Emails
+                        </button>
+                        <button onclick="clearAllLeads()" class="w-full bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-4 py-2 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
+                            <span>🗑️</span> Clear All Leads
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pipeline Section -->
+        <div class="mt-8 bg-gray-800/50 rounded-xl border border-gray-700">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <span>📋</span> Sales Pipeline
+                </h2>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- New Leads -->
+                    <div class="pipeline-stage bg-gray-700/30 rounded-lg p-3">
+                        <div class="text-sm font-semibold text-purple-300 mb-3 flex items-center justify-between">
+                            <span>🆕 New</span>
+                            <span id="pipelineNew" class="bg-purple-600 px-2 py-0.5 rounded-full text-xs">0</span>
+                        </div>
+                        <div id="pipelineNewList" class="space-y-2 min-h-[100px]"></div>
+                    </div>
+                    <!-- Contacted -->
+                    <div class="pipeline-stage bg-gray-700/30 rounded-lg p-3">
+                        <div class="text-sm font-semibold text-blue-300 mb-3 flex items-center justify-between">
+                            <span>📞 Contacted</span>
+                            <span id="pipelineContacted" class="bg-blue-600 px-2 py-0.5 rounded-full text-xs">0</span>
+                        </div>
+                        <div id="pipelineContactedList" class="space-y-2 min-h-[100px]"></div>
+                    </div>
+                    <!-- Qualified -->
+                    <div class="pipeline-stage bg-gray-700/30 rounded-lg p-3">
+                        <div class="text-sm font-semibold text-green-300 mb-3 flex items-center justify-between">
+                            <span>✅ Qualified</span>
+                            <span id="pipelineQualified" class="bg-green-600 px-2 py-0.5 rounded-full text-xs">0</span>
+                        </div>
+                        <div id="pipelineQualifiedList" class="space-y-2 min-h-[100px]"></div>
+                    </div>
+                    <!-- Converted -->
+                    <div class="pipeline-stage bg-gray-700/30 rounded-lg p-3">
+                        <div class="text-sm font-semibold text-yellow-300 mb-3 flex items-center justify-between">
+                            <span>💰 Converted</span>
+                            <span id="pipelineConverted" class="bg-yellow-600 px-2 py-0.5 rounded-full text-xs">0</span>
+                        </div>
+                        <div id="pipelineConvertedList" class="space-y-2 min-h-[100px]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Email Generation Modal -->
+    <div id="emailModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h3 class="text-xl font-semibold">✉️ AI-Generated Outreach Email</h3>
+                <button onclick="closeEmailModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="emailContent" class="p-6"></div>
+            <div class="p-4 border-t border-gray-700 flex gap-2">
+                <button onclick="copyEmail()" class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors">
+                    📋 Copy to Clipboard
+                </button>
+                <button onclick="closeEmailModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Store
+        let allLeads = [];
+        let isGenerating = false;
+        let generatedEmails = [];
+
+        // Business Data for Generation
+        const businessTypes = [
+            { type: 'Restaurant', suffixes: ['Bistro', 'Grill', 'Kitchen', 'Cafe', 'Diner'] },
+            { type: 'Technology', suffixes: ['Solutions', 'Tech', 'Systems', 'Digital', 'Labs'] },
+            { type: 'Consulting', suffixes: ['Consulting', 'Partners', 'Group', 'Advisors', 'Solutions'] },
+            { type: 'Marketing', suffixes: ['Agency', 'Media', 'Marketing', 'Creative', 'Studio'] },
+            { type: 'Real Estate', suffixes: ['Realty', 'Properties', 'Estate', 'Homes', 'Group'] },
+            { type: 'Healthcare', suffixes: ['Health', 'Medical', 'Care', 'Wellness', 'Clinic'] },
+            { type: 'Finance', suffixes: ['Capital', 'Financial', 'Wealth', 'Advisors', 'Group'] },
+            { type: 'Legal', suffixes: ['Law', 'Legal', 'Associates', 'Firm', 'Partners'] }
+        ];
+
+        const cities = [
+            { name: 'San Francisco', state: 'CA', potential: 95 },
+            { name: 'New York', state: 'NY', potential: 92 },
+            { name: 'Austin', state: 'TX', potential: 88 },
+            { name: 'Seattle', state: 'WA', potential: 90 },
+            { name: 'Denver', state: 'CO', potential: 85 },
+            { name: 'Miami', state: 'FL', potential: 87 },
+            { name: 'Chicago', state: 'IL', potential: 83 },
+            { name: 'Boston', state: 'MA', potential: 89 },
+            { name: 'Los Angeles', state: 'CA', potential: 91 },
+            { name: 'Portland', state: 'OR', potential: 82 }
+        ];
+
+        const firstNames = ['James', 'Mary', 'John', 'Sarah', 'Michael', 'Jennifer', 'David', 'Lisa', 'Robert', 'Maria'];
+        const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+
+        // Generate Random Business Name
+        function generateBusinessName() {
+            const business = businessTypes[Math.floor(Math.random() * businessTypes.length)];
+            const suffix = business.suffixes[Math.floor(Math.random() * business.suffixes.length)];
+            const prefixes = ['Apex', 'Summit', 'Premier', 'Elite', 'Prime', 'Metro', 'Pacific', 'Atlantic', 'Global', 'National'];
+            const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            return { name: `${prefix} ${suffix}`, type: business.type };
+        }
+
+        // Generate Random Contact
+        function generateContact() {
+            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const domains = ['gmail.com', 'outlook.com', 'company.com', 'biz.net'];
+            return {
+                name: `${firstName} ${lastName}`,
+                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domains[Math.floor(Math.random() * domains.length)]}`,
+                phone: `(${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`
+            };
+        }
+
+        // Calculate AI Lead Score
+        function calculateLeadScore(business, city) {
+            let score = 50; // Base score
+
+            // Business type multiplier
+            const typeMultipliers = {
+                'Technology': 1.3,
+                'Consulting': 1.2,
+                'Marketing': 1.15,
+                'Finance': 1.25,
+                'Legal': 1.2,
+                'Real Estate': 1.1,
+                'Healthcare': 1.15,
+                'Restaurant': 0.8
+            };
+            score *= (typeMultipliers[business.type] || 1);
+
+            // Location potential
+            score += (city.potential - 80) * 0.5;
+
+            // Random factors
+            score += Math.random() * 20 - 5;
+
+            // Company size (simulated)
+            const sizeBonus = Math.random() > 0.5 ? 10 : 0;
+            score += sizeBonus;
+
+            // Web presence (simulated)
+            const webBonus = Math.random() > 0.4 ? 8 : 0;
+            score += webBonus;
+
+            return Math.min(100, Math.max(0, Math.round(score)));
+        }
+
+        // Generate Analysis Text
+        function generateAnalysis(lead) {
+            const analyses = [
+                `High potential lead in ${lead.city.name}. Strong web presence detected. Estimated revenue: $${(Math.random() * 5 + 1).toFixed(1)}M.`,
+                `${lead.businessType} business with good growth indicators. Located in high-potential market. Recommended outreach: personalized email.`,
+                `Lead shows strong buying signals. Recently active in market. ${lead.score > 80 ? 'Priority follow-up recommended.' : 'Nurture campaign suggested.'}`,
+                `Business appears to be expanding. Good fit for your services. Decision maker likely: ${lead.contact.name.split(' ')[0]}.`,
+                `Market analysis shows positive trend. ${lead.businessType} sector growing ${Math.floor(Math.random() * 20 + 10)}% YoY in ${lead.city.name}.`
+            ];
+            return analyses[Math.floor(Math.random() * analyses.length)];
+        }
+
+        // Update Status
+        function updateStatus(status, color) {
+            const indicator = document.getElementById('statusIndicator');
+            indicator.innerHTML = `
+                <span class="w-3 h-3 bg-${color}-500 rounded-full ${color === 'green' ? 'scraping-pulse' : ''}"></span>
+                <span class="text-sm text-${color}-300">${status}</span>
+            `;
+        }
+
+        // Generate Lead
+        function generateLead() {
+            const city = cities[Math.floor(Math.random() * cities.length)];
+            const business = generateBusinessName();
+            const contact = generateContact();
+            const score = calculateLeadScore(business, city);
+
+            return {
+                id: Date.now() + Math.random(),
+                businessName: business.name,
+                businessType: business.type,
+                contact: contact,
+                city: city,
+                website: `https://www.${business.name.toLowerCase().replace(/\s+/g, '')}.com`,
+                estimatedRevenue: `$${(Math.random() * 10 + 0.5).toFixed(1)}M`,
+                employeeCount: Math.floor(Math.random() * 500 + 10),
+                score: score,
+                status: 'new',
+                discoveredAt: new Date(),
+                analysis: null
+            };
+        }
+
+        // Add Lead to Feed
+        function addLeadToFeed(lead) {
+            const feed = document.getElementById('leadFeed');
+
+            // Remove empty state if present
+            const emptyState = feed.querySelector('.text-center');
+            if (emptyState) emptyState.remove();
+
+            const card = document.createElement('div');
+            card.className = `lead-card bg-gray-700/50 rounded-lg p-4 border-l-4 ${lead.score >= 80 ? 'border-green-500' : lead.score >= 60 ? 'border-yellow-500' : 'border-gray-500'} hover:bg-gray-700 transition-colors cursor-pointer`;
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-2">
+                    <div>
+                        <h3 class="font-semibold text-white">${lead.businessName}</h3>
+                        <p class="text-sm text-purple-300">${lead.businessType}</p>
+                    </div>
+                    <div class="score-popup text-2xl font-bold ${lead.score >= 80 ? 'text-green-400' : lead.score >= 60 ? 'text-yellow-400' : 'text-gray-400'}">
+                        ${lead.score}
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                    <div>👤 ${lead.contact.name}</div>
+                    <div>📍 ${lead.city.name}, ${lead.city.state}</div>
+                    <div>📧 ${lead.contact.email}</div>
+                    <div>📞 ${lead.contact.phone}</div>
+                </div>
+                <div class="mt-2 flex items-center justify-between">
+                    <span class="text-xs text-gray-400">Revenue: ${lead.estimatedRevenue} • ${lead.employeeCount} employees</span>
+                    <div class="flex gap-1">
+                        <button onclick="addToPipeline(${lead.id})" class="bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs transition-colors">+ Pipeline</button>
+                        <button onclick="generateEmailForLead(${lead.id})" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs transition-colors">✉️ Email</button>
+                    </div>
+                </div>
+            `;
+
+            feed.insertBefore(card, feed.firstChild);
+        }
+
+        // Update AI Analysis Panel
+        function updateAIAnalysis(lead) {
+            const analysis = generateAnalysis(lead);
+            const panel = document.getElementById('aiAnalysis');
+
+            panel.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 pb-3 border-b border-gray-700">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center text-2xl">
+                            🏢
+                        </div>
+                        <div>
+                            <div class="font-semibold">${lead.businessName}</div>
+                            <div class="text-sm text-gray-400">${lead.businessType}</div>
+                        </div>
+                        <div class="ml-auto text-3xl font-bold ${lead.score >= 80 ? 'text-green-400' : 'text-yellow-400'}">
+                            ${lead.score}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-purple-300 mb-1">🤖 AI Analysis</div>
+                        <p class="text-sm text-gray-300">${analysis}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <div class="text-gray-400">Market Potential</div>
+                            <div class="font-semibold text-green-400">${lead.city.potential}/100</div>
+                        </div>
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <div class="text-gray-400">Est. Revenue</div>
+                            <div class="font-semibold">${lead.estimatedRevenue}</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-purple-300 mb-2">Score Breakdown</div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span>Industry Match</span>
+                                <div class="w-24 bg-gray-700 rounded-full h-2">
+                                    <div class="bg-purple-500 h-2 rounded-full" style="width: ${60 + Math.random() * 40}%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span>Location Score</span>
+                                <div class="w-24 bg-gray-700 rounded-full h-2">
+                                    <div class="bg-blue-500 h-2 rounded-full" style="width: ${lead.city.potential}%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span>Company Size</span>
+                                <div class="w-24 bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: ${40 + Math.random() * 60}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update Stats
+        function updateStats() {
+            const total = allLeads.length;
+            const qualified = allLeads.filter(l => l.score >= 80).length;
+            const avgScore = total > 0 ? Math.round(allLeads.reduce((sum, l) => sum + l.score, 0) / total) : 0;
+            const inPipeline = allLeads.filter(l => l.status !== 'new').length;
+
+            document.getElementById('totalLeads').textContent = total;
+            document.getElementById('qualifiedLeads').textContent = qualified;
+            document.getElementById('avgScore').textContent = avgScore;
+            document.getElementById('inPipeline').textContent = inPipeline;
+        }
+
+        // Update Pipeline Counts
+        function updatePipelineCounts() {
+            const new = allLeads.filter(l => l.status === 'new').length;
+            const contacted = allLeads.filter(l => l.status === 'contacted').length;
+            const qualified = allLeads.filter(l => l.status === 'qualified').length;
+            const converted = allLeads.filter(l => l.status === 'converted').length;
+
+            document.getElementById('pipelineNew').textContent = new;
+            document.getElementById('pipelineContacted').textContent = contacted;
+            document.getElementById('pipelineQualified').textContent = qualified;
+            document.getElementById('pipelineConverted').textContent = converted;
+        }
+
+        // Add to Pipeline
+        function addToPipeline(leadId) {
+            const lead = allLeads.find(l => l.id === leadId);
+            if (lead) {
+                lead.status = 'contacted';
+                updatePipelineCard(lead);
+                updatePipelineCounts();
+                updateStats();
+            }
+        }
+
+        // Update Pipeline Card
+        function updatePipelineCard(lead) {
+            const stageLists = {
+                'new': 'pipelineNewList',
+                'contacted': 'pipelineContactedList',
+                'qualified': 'pipelineQualifiedList',
+                'converted': 'pipelineConvertedList'
+            };
+
+            // Remove from old stage
+            Object.values(stageLists).forEach(id => {
+                const list = document.getElementById(id);
+                const existing = list.querySelector(`[data-lead-id="${lead.id}"]`);
+                if (existing) existing.remove();
+            });
+
+            // Add to new stage
+            const list = document.getElementById(stageLists[lead.status]);
+            const card = document.createElement('div');
+            card.className = 'bg-gray-600/50 rounded p-2 text-xs cursor-pointer hover:bg-gray-600 transition-colors';
+            card.setAttribute('data-lead-id', lead.id);
+            card.innerHTML = `
+                <div class="font-semibold truncate">${lead.businessName}</div>
+                <div class="text-gray-400">${lead.score} pts</div>
+            `;
+            list.appendChild(card);
+        }
+
+        // Generate Email for Lead
+        function generateEmailForLead(leadId) {
+            const lead = allLeads.find(l => l.id === leadId);
+            if (!lead) return;
+
+            const subjectLines = [
+                `Growing ${lead.businessType} in ${lead.city.name}?`,
+                `Quick question about ${lead.businessName}`,
+                `${lead.businessName} + ${Math.floor(Math.random() * 20 + 10)}% growth opportunity`,
+                `Your ${lead.businessType} business strategy`
+            ];
+
+            const body = `Hi ${lead.contact.name.split(' ')[0]},
+
+I came across ${lead.businessName} while researching top ${lead.businessType} companies in ${lead.city.name}, and I was impressed by what you've built.
+
+With the ${lead.businessType} sector growing ${Math.floor(Math.random() * 20 + 10)}% YoY in your area, I wanted to reach out and explore how we might help accelerate your growth.
+
+Based on my research, companies like yours are typically looking to:
+• Scale their operations efficiently
+• Improve customer acquisition
+• Optimize their technology stack
+
+Would you be open to a brief 15-minute call next week to discuss potential opportunities?
+
+Best regards,
+Your Name
+LeadForge AI
+
+P.S. I've also analyzed your market position and have some insights specific to ${lead.city.name}'s ${lead.businessType} landscape that I think you'd find valuable.`;
+
+            generatedEmails.push({ lead, subject: subjectLines[Math.floor(Math.random() * subjectLines.length)], body });
+
+            const modal = document.getElementById('emailModal');
+            const content = document.getElementById('emailContent');
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">To:</label>
+                        <div class="bg-gray-700 p-2 rounded">${lead.contact.name} &lt;${lead.contact.email}&gt;</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Subject:</label>
+                        <div class="bg-gray-700 p-2 rounded">${generatedEmails[generatedEmails.length - 1].subject}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Body:</label>
+                        <div class="bg-gray-700 p-4 rounded whitespace-pre-wrap text-sm">${body}</div>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // Close Email Modal
+        function closeEmailModal() {
+            const modal = document.getElementById('emailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Copy Email
+        function copyEmail() {
+            if (generatedEmails.length > 0) {
+                const email = generatedEmails[generatedEmails.length - 1];
+                const text = `To: ${email.lead.contact.name} <${email.lead.contact.email}>\nSubject: ${email.subject}\n\n${email.body}`;
+                navigator.clipboard.writeText(text);
+                alert('Email copied to clipboard!');
+            }
+        }
+
+        // Export Leads
+        function exportLeads() {
+            if (allLeads.length === 0) {
+                alert('No leads to export yet!');
+                return;
+            }
+
+            const csv = [
+                ['Business Name', 'Contact Name', 'Email', 'Phone', 'Industry', 'City', 'State', 'Score', 'Revenue', 'Website'].join(','),
+                ...allLeads.map(l => [
+                    l.businessName,
+                    l.contact.name,
+                    l.contact.email,
+                    l.contact.phone,
+                    l.businessType,
+                    l.city.name,
+                    l.city.state,
+                    l.score,
+                    l.estimatedRevenue,
+                    l.website
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `leadforge-export-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        // Generate Outreach Emails
+        function generateOutreach() {
+            if (allLeads.length === 0) {
+                alert('Generate some leads first!');
+                return;
+            }
+
+            const qualifiedLeads = allLeads.filter(l => l.score >= 80).slice(0, 3);
+            if (qualifiedLeads.length === 0) {
+                alert('Need qualified leads (80+ score) to generate outreach emails!');
+                return;
+            }
+
+            qualifiedLeads.forEach(lead => generateEmailForLead(lead.id));
+        }
+
+        // Clear All Leads
+        function clearAllLeads() {
+            if (confirm('Are you sure you want to clear all leads?')) {
+                allLeads = [];
+                document.getElementById('leadFeed').innerHTML = `
+                    <div class="text-center text-gray-500 py-12">
+                        <div class="text-5xl mb-4">🎯</div>
+                        <p>Click "Start Lead Generation" to begin discovering leads</p>
+                    </div>
+                `;
+                document.getElementById('aiAnalysis').innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <p class="text-sm">AI scoring analysis will appear here as leads are discovered</p>
+                    </div>
+                `;
+                ['pipelineNewList', 'pipelineContactedList', 'pipelineQualifiedList', 'pipelineConvertedList'].forEach(id => {
+                    document.getElementById(id).innerHTML = '';
+                });
+                updateStats();
+                updatePipelineCounts();
+            }
+        }
+
+        // Filter Leads
+        function filterLeads() {
+            const industry = document.getElementById('filterIndustry').value;
+            const score = document.getElementById('filterScore').value;
+
+            const cards = document.querySelectorAll('#leadFeed .lead-card');
+            cards.forEach(card => {
+                const cardIndustry = card.querySelector('.text-purple-300').textContent;
+                const cardScore = parseInt(card.querySelector('.text-2xl').textContent);
+
+                let show = true;
+                if (industry && cardIndustry !== industry) show = false;
+                if (score === '80' && cardScore < 80) show = false;
+                if (score === '60' && (cardScore < 60 || cardScore >= 80)) show = false;
+                if (score === '0' && cardScore >= 60) show = false;
+
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        // Update Filter Options
+        function updateFilterOptions() {
+            const industrySelect = document.getElementById('filterIndustry');
+            const industries = [...new Set(allLeads.map(l => l.businessType))];
+
+            industrySelect.innerHTML = '<option value="">All Industries</option>';
+            industries.forEach(industry => {
+                industrySelect.innerHTML += `<option value="${industry}">${industry}</option>`;
+            });
+        }
+
+        // Main Lead Generation Loop
+        async function startLeadGeneration() {
+            if (isGenerating) return;
+            isGenerating = true;
+
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+            btn.classList.add('opacity-50');
+
+            updateStatus('Active', 'green');
+            document.getElementById('progressSection').classList.remove('hidden');
+
+            const targetLeads = Math.floor(Math.random() * 15) + 20; // 20-35 leads
+            let leadCount = 0;
+
+            const phases = [
+                { name: 'Initializing AI scrapers...', duration: 1000 },
+                { name: 'Connecting to data sources...', duration: 1500 },
+                { name: 'Scanning Google Maps...', duration: 2000 },
+                { name: 'Analyzing Yelp listings...', duration: 2000 },
+                { name: 'Enriching lead data...', duration: 1500 },
+                { name: 'AI scoring in progress...', duration: 1000 }
+            ];
+
+            for (let i = 0; i < phases.length; i++) {
+                document.getElementById('progressText').textContent = phases[i].name;
+                await new Promise(resolve => setTimeout(resolve, phases[i].duration));
+                document.getElementById('progressBar').style.width = `${((i + 1) / phases.length) * 100}%`;
+            }
+
+            document.getElementById('progressText').textContent = 'Discovering leads...';
+
+            const generationInterval = setInterval(() => {
+                if (leadCount >= targetLeads || !isGenerating) {
+                    clearInterval(generationInterval);
+                    completeGeneration();
+                    return;
+                }
+
+                const lead = generateLead();
+                allLeads.push(lead);
+                leadCount++;
+
+                addLeadToFeed(lead);
+                updateAIAnalysis(lead);
+                updateStats();
+                updateFilterOptions();
+                document.getElementById('progressStats').textContent = `${leadCount} leads found`;
+
+                // Automatically add some high-score leads to pipeline
+                if (lead.score >= 85 && Math.random() > 0.5) {
+                    addToPipeline(lead.id);
+                }
+
+            }, 800 + Math.random() * 1200); // 0.8-2 seconds between leads
+        }
+
+        // Complete Generation
+        function completeGeneration() {
+            isGenerating = false;
+
+            const btn = document.getElementById('startBtn');
+            btn.disabled = false;
+            btn.textContent = '🚀 Generate More Leads';
+            btn.classList.remove('opacity-50');
+
+            updateStatus('Completed', 'blue');
+            document.getElementById('progressText').textContent = `Generation complete! Found ${allLeads.length} leads`;
+            document.getElementById('progressBar').style.width = '100%';
+
+            setTimeout(() => {
+                document.getElementById('progressSection').classList.add('hidden');
+                updateStatus('Idle', 'gray');
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
+            updatePipelineCounts();
+        });
+    </script>
+</body>
+</html>
